@@ -1,8 +1,6 @@
 import os
-import threading
 import discord
 import pickle
-from flask import Flask
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -12,20 +10,6 @@ ADMIN_ID = 253739732276740096
 
 # Print token status
 print(f"[INIT] DISCORD_TOKEN loaded: {bool(TOKEN)}")
-
-# Initialize Flask app
-app = Flask(__name__)
-print("[INIT] Flask app initialized.")
-
-@app.route('/render-health')
-def render_health_check():
-    print("[FLASK] /render-health endpoint called.")
-    return "OK", 200
-
-@app.route('/')
-def health_check():
-    print("[FLASK] / endpoint called.")
-    return "🤖 Bot is running!", 200
 
 # Discord client setup
 intents = discord.Intents.default()
@@ -103,20 +87,10 @@ async def on_message(message):
         print(f"[ERROR] Error handling message: {e}")
         await message.channel.send("❌ Something went wrong!")
 
-def run_flask():
-    port = int(os.getenv('PORT', 10000))
-    print(f"[FLASK] Starting Flask on port {port}...")
-    app.run(host='0.0.0.0', port=port)
-
 def run_bot():
     print("[DISCORD] Starting Discord bot...")
     client.run(TOKEN)
 
 if __name__ == "__main__":
-    print("[MAIN] Starting Flask thread...")
-    flask_thread = threading.Thread(target=run_flask)
-    flask_thread.daemon = True
-    flask_thread.start()
-
-    print("[MAIN] Running Discord bot in main thread.")
+    print("[MAIN] Running Discord bot.")
     run_bot()
