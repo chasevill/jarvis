@@ -12,7 +12,7 @@ ADMIN_ID = 253739732276740096
 
 # Initialize Flask app
 app = Flask(__name__)
-
+print(bool(TOKEN))
 
 @app.route('/render-health')
 def render_health_check():
