@@ -98,7 +98,7 @@ async def on_message(message):
 
 
 def run_flask():
-    app.run(host='0.0.0.0', port=os.getenv('PORT', 4000))
+    app.run(host='0.0.0.0', port=os.getenv('PORT', 10000))
 
 
 def run_bot():
