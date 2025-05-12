@@ -1,15 +1,25 @@
 import os
+import threading
 import discord
 import pickle
+from flask import Flask
 from dotenv import load_dotenv
 
-# Configuration
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 DATA_FILE = 'pregnant_man_counts.pkl'
 ADMIN_ID = 253739732276740096
 
-# Initialize Discord client
+# Initialize Flask app
+app = Flask(__name__)
+
+
+@app.route('/')
+def health_check():
+    return "🤖 Bot is running!", 200
+
+
+# Discord client setup
 intents = discord.Intents.default()
 intents.message_content = True
 client = discord.Client(intents=intents)
@@ -22,7 +32,6 @@ except FileNotFoundError:
     pregnant_man_counts = {}
 
 
-# Pregnant Functions
 def save_counts():
     with open(DATA_FILE, 'wb') as f:
         pickle.dump(pregnant_man_counts, f)
@@ -53,10 +62,9 @@ async def handle_reset(message):
         pregnant_man_counts.clear()
         await message.channel.send("🧹 Nuked all pregnancy counts!")
     save_counts()
-###################################
 
 
-# Event handlers
+# Discord events
 @client.event
 async def on_ready():
     print(f'{client.user} has connected to Discord!')
@@ -72,23 +80,31 @@ async def on_message(message):
         return
 
     try:
-        # Pregnant stuff
         if message_split[0] == '!pregnantcount':
             await handle_pregnant_count(message)
-
-        elif (message_split[0] == '!reset'
-              and message.author.id == ADMIN_ID):
+        elif message_split[0] == '!reset' and message.author.id == ADMIN_ID:
             await handle_reset(message)
-
-        elif (message.reference
-              and message.content == "https://tenor.com/view/jarvis-react-this-user-pregnant-man-gif"
-                                     "-7314513712895381143"):
+        elif (message.reference and
+              message.content.startswith("https://tenor.com/view/jarvis-react-this-user-pregnant-man-gif")):
             await handle_gif_reaction(message)
-        ######################
-
     except Exception as e:
         print(f"Error handling message: {e}")
         await message.channel.send("❌ Something went wrong!")
 
 
-client.run(TOKEN)
+def run_flask():
+    app.run(host='0.0.0.0', port=os.getenv('PORT', 4000))
+
+
+def run_bot():
+    client.run(TOKEN)
+
+
+if __name__ == "__main__":
+    # Start Flask in a separate thread
+    flask_thread = threading.Thread(target=run_flask)
+    flask_thread.daemon = True
+    flask_thread.start()
+
+    # Run Discord bot in main thread
+    run_bot()
