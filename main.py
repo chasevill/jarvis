@@ -14,6 +14,11 @@ ADMIN_ID = 253739732276740096
 app = Flask(__name__)
 
 
+@app.route('/keep-alive')
+def keep_alive():
+    return "Alive", 200
+
+
 @app.route('/')
 def health_check():
     return "🤖 Bot is running!", 200
