@@ -14,9 +14,9 @@ ADMIN_ID = 253739732276740096
 app = Flask(__name__)
 
 
-@app.route('/keep-alive')
-def keep_alive():
-    return "Alive", 200
+@app.route('/render-health')
+def render_health_check():
+    return "OK", 200
 
 
 @app.route('/')
